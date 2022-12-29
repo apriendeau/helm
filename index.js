@@ -201,7 +201,6 @@ async function addRegistry(helm) {
     if (registryPassword) args.push(`--password=${registryPassword}`);
 
     await exec.exec(helm, args);
-    await exec.exec(helm, ["repo", "update"]);
   }
 
   return Promise.resolve();
