@@ -69,16 +69,15 @@ inputs:
   repo-password:
     description: Helm repository password if authentication is needed.
     required: false
+  registry:
+    description: Helm registry that will be used.
+    required: false
   registry-username:
-    description: Helm registry username
+    description: Helm registry username if authentication is needed.
     required: false
   registry-password:
-    description: Helm registry password
+    description: Helm registry password if authentication is needed.
     required: false
-  registry:
-    description: url of registry
-    required: false
-
 runs:
   using: docker
   image: Dockerfile
