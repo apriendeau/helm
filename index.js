@@ -195,7 +195,7 @@ async function addRegistry(helm) {
   if (registry !== "") {
     core.debug(`adding custom registry ${registry}`);
 
-    const args = ["registry ", "login", registry];
+    const args = ["registry", "login", registry];
 
     if (registryUsername) args.push(`--username=${registryUsername}`);
     if (registryPassword) args.push(`--password=${registryPassword}`);
