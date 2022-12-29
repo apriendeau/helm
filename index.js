@@ -35,8 +35,8 @@ async function status(state) {
       log_url: url,
       target_url: url,
       headers: {
-        accept: 'application/vnd.github.ant-man-preview+json'
-      }
+        accept: "application/vnd.github.ant-man-preview+json",
+      },
     });
   } catch (error) {
     core.warning(`Failed to set deployment status: ${error.message}`);
@@ -93,7 +93,7 @@ function getValueFiles(files) {
   if (!Array.isArray(fileList)) {
     return [];
   }
-  return fileList.filter(f => !!f);
+  return fileList.filter((f) => !!f);
 }
 
 function getInput(name, options) {
@@ -101,7 +101,7 @@ function getInput(name, options) {
   const deployment = context.payload.deployment;
   let val = core.getInput(name.replace("_", "-"), {
     ...options,
-    required: false
+    required: false,
   });
   if (deployment) {
     if (deployment[name]) val = deployment[name];
@@ -123,7 +123,7 @@ function renderFiles(files, data) {
     `rendering value files [${files.join(",")}] with: ${JSON.stringify(data)}`
   );
   const tags = ["${{", "}}"];
-  const promises = files.map(async file => {
+  const promises = files.map(async (file) => {
     const content = await readFile(file, { encoding: "utf8" });
     const rendered = Mustache.render(content, data, {}, tags);
     await writeFile(file, rendered);
@@ -161,26 +161,50 @@ async function addRepo(helm) {
 
   if (repo !== "") {
     if (repoAlias === "") {
-      throw new Error("repo alias is required when you are setting a repository");
+      throw new Error(
+        "repo alias is required when you are setting a repository"
+      );
     }
 
     core.debug(`adding custom repository ${repo} with alias ${repoAlias}`);
 
-    const args = [
-      "repo",
-      "add",
-      repoAlias,
-      repo,
-    ]
+    const args = ["repo", "add", repoAlias, repo];
 
     if (repoUsername) args.push(`--username=${repoUsername}`);
     if (repoPassword) args.push(`--password=${repoPassword}`);
 
     await exec.exec(helm, args);
-    await exec.exec(helm, ["repo", "update"])
+    await exec.exec(helm, ["repo", "update"]);
   }
 
-  return Promise.resolve()
+  return Promise.resolve();
+}
+
+/*
+ * Optionally add a helm registry
+ */
+async function addRegistry(helm) {
+  const registry = getInput("registry");
+  const registryUsername = getInput("registry-username");
+  const registryPassword = getInput("registry-password");
+
+  core.debug(`param: registry = "${registry}"`);
+  core.debug(`param: registryUsername = "${registryUsername}"`);
+  core.debug(`param: registryPassword = "${registryPassword}"`);
+
+  if (registry !== "") {
+    core.debug(`adding custom registry ${registry}`);
+
+    const args = ["registry ", "login", registry];
+
+    if (registryUsername) args.push(`--username=${registryUsername}`);
+    if (registryPassword) args.push(`--password=${registryPassword}`);
+
+    await exec.exec(helm, args);
+    await exec.exec(helm, ["repo", "update"]);
+  }
+
+  return Promise.resolve();
 }
 
 /*
@@ -237,7 +261,7 @@ async function deploy(helm) {
   if (chartVersion) args.push(`--version=${chartVersion}`);
   if (timeout) args.push(`--timeout=${timeout}`);
 
-  valueFiles.forEach(f => args.push(`--values=${f}`));
+  valueFiles.forEach((f) => args.push(`--values=${f}`));
 
   args.push("--values=./values.yml");
 
@@ -267,14 +291,14 @@ async function deploy(helm) {
   if (removeCanary) {
     core.debug(`removing canary ${appName}-canary`);
     await exec.exec(helm, deleteCmd(helm, namespace, `${appName}-canary`), {
-      ignoreReturnCode: true
+      ignoreReturnCode: true,
     });
   }
 
   // Actually execute the deployment here.
   if (task === "remove") {
     return exec.exec(helm, deleteCmd(helm, namespace, release), {
-      ignoreReturnCode: true
+      ignoreReturnCode: true,
     });
   }
 
@@ -285,25 +309,25 @@ async function deploy(helm) {
  * Run executes the helm deployment.
  */
 async function run() {
-  const commands = [addRepo, deploy]
+  const commands = [addRepo, addRegistry, deploy];
 
   try {
     await status("pending");
 
-    process.env.XDG_DATA_HOME = "/root/.helm/"
-    process.env.XDG_CACHE_HOME = "/root/.helm/"
-    process.env.XDG_CONFIG_HOME = "/root/.helm/"
-  
+    process.env.XDG_DATA_HOME = "/root/.helm/";
+    process.env.XDG_CACHE_HOME = "/root/.helm/";
+    process.env.XDG_CONFIG_HOME = "/root/.helm/";
+
     // Setup necessary files.
     if (process.env.KUBECONFIG_FILE) {
       process.env.KUBECONFIG = "./kubeconfig.yml";
       await writeFile(process.env.KUBECONFIG, process.env.KUBECONFIG_FILE);
     }
-    
+
     const helm = getInput("helm") || "helm3";
     core.debug(`param: helm = "${helm}"`);
 
-    for(const command of commands) {
+    for (const command of commands) {
       await command(helm);
     }
 
