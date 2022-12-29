@@ -38,6 +38,9 @@ payload if the action was triggered by a deployment.
 - `repo-alias`: Helm repository alias that will be used.
 - `repo-username`: Helm repository username if authentication is needed.
 - `repo-password`: Helm repository password if authentication is needed.
+- `registry`: Helm registry that will be used.
+- `registry-username`: Helm registry username if authentication is needed.
+- `registry-password`: Helm registry password if authentication is needed.
 - `atomic`: If true, upgrade process rolls back changes made in case of failed upgrade. Defaults to true.
 
 Additional parameters: If the action is being triggered by a deployment event
@@ -85,7 +88,7 @@ jobs:
           name: foobar
         value-files: >-
         [
-          "values.yaml", 
+          "values.yaml",
           "values.production.yaml"
         ]
       env:
@@ -107,26 +110,26 @@ resources to pick up the canary pods and route traffic to them.
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy
-on: ['deployment']
+on: ["deployment"]
 
 jobs:
   deployment:
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
-    - uses: actions/checkout@v1
+      - uses: actions/checkout@v1
 
-    - name: 'Deploy'
-      uses: 'deliverybot/helm@v1'
-      with:
-        release: 'nginx'
-        track: canary
-        namespace: 'default'
-        chart: 'app'
-        token: '${{ github.token }}'
-        values: |
-          name: foobar
-      env:
-        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+      - name: "Deploy"
+        uses: "deliverybot/helm@v1"
+        with:
+          release: "nginx"
+          track: canary
+          namespace: "default"
+          chart: "app"
+          token: "${{ github.token }}"
+          values: |
+            name: foobar
+        env:
+          KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
 ```
 
 ## Example pr cleanup
@@ -145,21 +148,21 @@ on:
 
 jobs:
   deployment:
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
-    - name: 'Deploy'
-      uses: 'deliverybot/helm@v1'
-      with:
-        # Task remove means to remove the helm release.
-        task: 'remove'
-        release: 'review-myapp-${{ github.event.pull_request.number }}'
-        version: '${{ github.sha }}'
-        track: 'stable'
-        chart: 'app'
-        namespace: 'example-helm'
-        token: '${{ github.token }}'
-      env:
-        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+      - name: "Deploy"
+        uses: "deliverybot/helm@v1"
+        with:
+          # Task remove means to remove the helm release.
+          task: "remove"
+          release: "review-myapp-${{ github.event.pull_request.number }}"
+          version: "${{ github.sha }}"
+          track: "stable"
+          chart: "app"
+          namespace: "example-helm"
+          token: "${{ github.token }}"
+        env:
+          KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
 ```
 
 ## Example add custom repository
@@ -175,20 +178,19 @@ on:
 
 jobs:
   deployment:
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     steps:
-    - name: 'Deploy'
-      uses: 'deliverybot/helm@v1'
-      with:
-        release: 'nginx'
-        namespace: 'default'
-        chart: 'chartmuseum/app'
-        token: '${{ github.token }}'
-        repo: 'http://chartmuseum.example.com'
-        repo-alias: chartmuseum
-        repo-username: ${{ secrets.CHARTMUSEUM_USERNAME }}
-        repo-password: ${{ secrets.CHARTMUSEUM_PASSWORD }}
-      env:
-        KUBECONFIG_FILE: '${{ secrets.KUBECONFIG }}'
+      - name: "Deploy"
+        uses: "deliverybot/helm@v1"
+        with:
+          release: "nginx"
+          namespace: "default"
+          chart: "chartmuseum/app"
+          token: "${{ github.token }}"
+          repo: "http://chartmuseum.example.com"
+          repo-alias: chartmuseum
+          repo-username: ${{ secrets.CHARTMUSEUM_USERNAME }}
+          repo-password: ${{ secrets.CHARTMUSEUM_PASSWORD }}
+        env:
+          KUBECONFIG_FILE: "${{ secrets.KUBECONFIG }}"
 ```
-
