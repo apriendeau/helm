@@ -78,6 +78,9 @@ inputs:
   registry-password:
     description: Helm registry password if authentication is needed.
     required: false
+  timeout:
+    description: specify a timeout for helm deployment
+    required: false
 runs:
   using: docker
   image: Dockerfile
