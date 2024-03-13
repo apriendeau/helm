@@ -249,6 +249,7 @@ async function deploy(helm) {
     "upgrade",
     release,
     chart,
+    "--history-max 10",
     "--install",
     "--wait",
     `--namespace=${namespace}`,
